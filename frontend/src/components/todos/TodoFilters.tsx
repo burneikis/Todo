@@ -15,11 +15,13 @@ const FiltersHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  min-height: 2rem;
 
   @media (max-width: 640px) {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
+    min-height: auto;
   }
 `;
 
@@ -102,19 +104,25 @@ const StatusTab = styled.button<{ active: boolean }>`
   }
 `;
 
-const ClearButton = styled.button`
+const ClearButton = styled.button<{ visible: boolean }>`
   padding: 0.5rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   background: white;
   color: #6b7280;
   font-size: 0.875rem;
-  cursor: pointer;
+  cursor: ${props => props.visible ? 'pointer' : 'default'};
   transition: all 0.15s;
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+  opacity: ${props => props.visible ? 1 : 0};
 
   &:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: ${props => props.visible ? '#f9fafb' : 'white'};
+    border-color: ${props => props.visible ? '#9ca3af' : '#d1d5db'};
+  }
+
+  &:disabled {
+    pointer-events: none;
   }
 `;
 
@@ -175,11 +183,13 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
     <FiltersContainer>
       <FiltersHeader>
         <FiltersTitle>Filter & Sort Todos</FiltersTitle>
-        {hasActiveFilters && (
-          <ClearButton onClick={handleClearFilters}>
-            Clear Filters
-          </ClearButton>
-        )}
+        <ClearButton 
+          visible={hasActiveFilters} 
+          onClick={handleClearFilters}
+          disabled={!hasActiveFilters}
+        >
+          Clear Filters
+        </ClearButton>
       </FiltersHeader>
       
       <StatusTabs>
