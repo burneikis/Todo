@@ -10,11 +10,23 @@ const FiltersContainer = styled.div`
   margin-bottom: 2rem;
 `;
 
-const FiltersHeader = styled.h3`
+const FiltersHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+`;
+
+const FiltersTitle = styled.h3`
   font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 1rem;
 `;
 
 const FiltersGrid = styled.div`
@@ -161,7 +173,14 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
 
   return (
     <FiltersContainer>
-      <FiltersHeader>Filter & Sort Todos</FiltersHeader>
+      <FiltersHeader>
+        <FiltersTitle>Filter & Sort Todos</FiltersTitle>
+        {hasActiveFilters && (
+          <ClearButton onClick={handleClearFilters}>
+            Clear Filters
+          </ClearButton>
+        )}
+      </FiltersHeader>
       
       <StatusTabs>
         {['all', 'pending', 'completed'].map((status) => (
@@ -243,14 +262,6 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
           </Select>
         </FilterGroup>
       </FiltersGrid>
-
-      {hasActiveFilters && (
-        <div style={{ marginTop: '1rem', textAlign: 'right' }}>
-          <ClearButton onClick={handleClearFilters}>
-            Clear Filters
-          </ClearButton>
-        </div>
-      )}
 
       <FilterSummary>
         Showing {filteredCount} of {totalCount} todos
