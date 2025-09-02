@@ -15,15 +15,16 @@ const Header = styled.header`
   background: white;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  flex-wrap: wrap;
   gap: 1rem;
 
   @media (max-width: 768px) {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
   }
 `;
 
@@ -37,6 +38,11 @@ const UserInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+  justify-self: end;
+
+  @media (max-width: 768px) {
+    justify-self: stretch;
+  }
 `;
 
 const UserName = styled.span`
