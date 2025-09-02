@@ -23,11 +23,61 @@ const TodoHeader = styled.div`
   margin-bottom: 1rem;
 `;
 
-const Checkbox = styled.input`
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  margin-top: 0.125rem;
+`;
+
+const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+`;
+
+const StyledCheckbox = styled.div<{ checked: boolean }>`
+  display: inline-block;
   width: 1.25rem;
   height: 1.25rem;
-  margin-top: 0.125rem;
+  background: ${props => props.checked ? '#10b981' : 'white'};
+  border: 2px solid ${props => props.checked ? '#10b981' : '#d1d5db'};
+  border-radius: 0.25rem;
+  transition: all 0.15s;
+  position: relative;
   cursor: pointer;
+  
+  &:hover {
+    border-color: ${props => props.checked ? '#059669' : '#9ca3af'};
+    background: ${props => props.checked ? '#059669' : '#f9fafb'};
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    display: ${props => props.checked ? 'block' : 'none'};
+    left: 0.375rem;
+    top: 0.125rem;
+    width: 0.25rem;
+    height: 0.5rem;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  @media (max-width: 640px) {
+    width: 1.5rem;
+    height: 1.5rem;
+    
+    &::after {
+      left: 0.5rem;
+      top: 0.25rem;
+      width: 0.375rem;
+      height: 0.625rem;
+      border-width: 0 3px 3px 0;
+    }
+  }
 `;
 
 const TodoContent = styled.div`
@@ -181,12 +231,17 @@ export const TodoItem: React.FC<TodoItemProps> = ({
   return (
     <TodoCard completed={todo.completed}>
       <TodoHeader>
-        <Checkbox
-          type="checkbox"
-          checked={todo.completed}
-          onChange={handleToggle}
-          disabled={isLoading}
-        />
+        <CheckboxContainer>
+          <HiddenCheckbox
+            checked={todo.completed}
+            onChange={handleToggle}
+            disabled={isLoading}
+          />
+          <StyledCheckbox 
+            checked={todo.completed}
+            onClick={handleToggle}
+          />
+        </CheckboxContainer>
         <TodoContent>
           <TodoTitle completed={todo.completed}>
             {todo.title}
