@@ -4,6 +4,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
+import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
 
 const GlobalStyle = createGlobalStyle`
@@ -61,6 +62,7 @@ const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <SignUpPage />} />
       <Route
         path="/dashboard"
         element={
