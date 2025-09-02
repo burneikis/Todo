@@ -42,6 +42,7 @@ export interface CreateTodoRequest {
   description?: string;
   priority?: 'low' | 'medium' | 'high';
   due_date?: string;
+  categoryIds?: number[];
 }
 
 export interface UpdateTodoRequest {
@@ -50,6 +51,7 @@ export interface UpdateTodoRequest {
   completed?: boolean;
   priority?: 'low' | 'medium' | 'high';
   due_date?: string;
+  categoryIds?: number[];
 }
 
 export interface RegisterRequest {

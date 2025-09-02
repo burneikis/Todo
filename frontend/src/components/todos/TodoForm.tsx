@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Button } from '../common/Button';
-import { CreateTodoRequest, UpdateTodoRequest, Todo } from '../../types';
+import { CreateTodoRequest, UpdateTodoRequest, Todo, Category } from '../../types';
+import { categoryService } from '../../services/categoryService';
 
 const FormContainer = styled.div`
   background: white;
@@ -99,6 +100,35 @@ const ButtonGroup = styled.div`
   }
 `;
 
+const CategorySelection = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const CategoryTag = styled.button<{ selected: boolean; color: string }>`
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 2px solid ${props => props.selected ? props.color : '#e5e7eb'};
+  background-color: ${props => props.selected ? props.color : 'white'};
+  color: ${props => props.selected ? 'white' : '#374151'};
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: ${props => props.color};
+    background-color: ${props => props.selected ? props.color : `${props.color}10`};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 interface TodoFormProps {
   initialData?: Todo;
   onSubmit: (data: CreateTodoRequest | UpdateTodoRequest) => Promise<void>;
@@ -112,12 +142,29 @@ export const TodoForm: React.FC<TodoFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
     priority: initialData?.priority || 'medium' as const,
     due_date: initialData?.due_date ? new Date(initialData.due_date).toISOString().split('T')[0] : '',
   });
+  const [selectedCategories, setSelectedCategories] = useState<number[]>(
+    initialData?.categories?.map(cat => cat.id) || []
+  );
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const data = await categoryService.getCategories();
+      setCategories(data);
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +174,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
       description: formData.description.trim() || undefined,
       priority: formData.priority,
       due_date: formData.due_date || undefined,
+      categoryIds: selectedCategories.length > 0 ? selectedCategories : undefined,
     };
 
     await onSubmit(submitData);
@@ -138,12 +186,21 @@ export const TodoForm: React.FC<TodoFormProps> = ({
         priority: 'medium',
         due_date: '',
       });
+      setSelectedCategories([]);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const toggleCategory = (categoryId: number) => {
+    setSelectedCategories(prev => 
+      prev.includes(categoryId) 
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
   return (
@@ -203,6 +260,29 @@ export const TodoForm: React.FC<TodoFormProps> = ({
             />
           </FormGroup>
         </FormRow>
+
+        <FormGroup>
+          <Label>Categories (optional)</Label>
+          <CategorySelection>
+            {categories.map(category => (
+              <CategoryTag
+                key={category.id}
+                type="button"
+                selected={selectedCategories.includes(category.id)}
+                color={category.color}
+                onClick={() => toggleCategory(category.id)}
+                disabled={isLoading}
+              >
+                {category.name}
+              </CategoryTag>
+            ))}
+            {categories.length === 0 && (
+              <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                No categories available. Create some categories first!
+              </span>
+            )}
+          </CategorySelection>
+        </FormGroup>
 
         <ButtonGroup>
           {onCancel && (

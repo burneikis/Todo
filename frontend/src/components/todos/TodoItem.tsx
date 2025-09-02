@@ -108,6 +108,24 @@ const ButtonGroup = styled.div`
   flex-wrap: wrap;
 `;
 
+const CategoryTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const CategoryTag = styled.span<{ color: string; completed: boolean }>`
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: ${props => props.color};
+  color: white;
+  opacity: ${props => props.completed ? 0.6 : 1};
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+`;
+
 interface TodoItemProps {
   todo: Todo;
   onToggle: (id: number) => Promise<void>;
@@ -196,6 +214,20 @@ export const TodoItem: React.FC<TodoItemProps> = ({
               Created: {formatDateTime(todo.created_at)}
             </CreatedDate>
           </TodoMeta>
+
+          {todo.categories && todo.categories.length > 0 && (
+            <CategoryTags>
+              {todo.categories.map(category => (
+                <CategoryTag 
+                  key={category.id} 
+                  color={category.color}
+                  completed={todo.completed}
+                >
+                  {category.name}
+                </CategoryTag>
+              ))}
+            </CategoryTags>
+          )}
 
           <ButtonGroup>
             <Button

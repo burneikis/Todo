@@ -167,8 +167,11 @@ export const TodoList: React.FC = () => {
         (filters.status === 'pending' && !todo.completed);
       
       const matchesPriority = filters.priority === 'all' || todo.priority === filters.priority;
+      
+      const matchesCategory = filters.category === 'all' || 
+        (todo.categories && todo.categories.some(cat => cat.id === Number(filters.category)));
 
-      return matchesSearch && matchesStatus && matchesPriority;
+      return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
     });
 
     filtered.sort((a, b) => {

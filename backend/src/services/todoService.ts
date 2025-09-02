@@ -2,11 +2,24 @@ import { query } from '../utils/database';
 import { Todo, CreateTodoRequest, UpdateTodoRequest } from '../types';
 
 export const getAllTodos = async (userId: number): Promise<Todo[]> => {
-  const result = await query(
+  const todosResult = await query(
     'SELECT * FROM todos WHERE user_id = $1 ORDER BY created_at DESC',
     [userId]
   );
-  return result.rows;
+  
+  const todos = todosResult.rows;
+  
+  // Get categories for each todo
+  for (const todo of todos) {
+    const categoriesResult = await query(`
+      SELECT c.* FROM categories c
+      JOIN todo_categories tc ON c.id = tc.category_id
+      WHERE tc.todo_id = $1
+    `, [todo.id]);
+    todo.categories = categoriesResult.rows;
+  }
+  
+  return todos;
 };
 
 export const getTodoById = async (todoId: number, userId: number): Promise<Todo | null> => {
@@ -14,11 +27,23 @@ export const getTodoById = async (todoId: number, userId: number): Promise<Todo 
     'SELECT * FROM todos WHERE id = $1 AND user_id = $2',
     [todoId, userId]
   );
-  return result.rows[0] || null;
+  
+  const todo = result.rows[0];
+  if (!todo) return null;
+  
+  // Get categories for this todo
+  const categoriesResult = await query(`
+    SELECT c.* FROM categories c
+    JOIN todo_categories tc ON c.id = tc.category_id
+    WHERE tc.todo_id = $1
+  `, [todo.id]);
+  todo.categories = categoriesResult.rows;
+  
+  return todo;
 };
 
 export const createTodo = async (todoData: CreateTodoRequest, userId: number): Promise<Todo> => {
-  const { title, description, priority = 'medium', due_date } = todoData;
+  const { title, description, priority = 'medium', due_date, categoryIds = [] } = todoData;
   
   const result = await query(
     `INSERT INTO todos (user_id, title, description, priority, due_date) 
@@ -27,7 +52,15 @@ export const createTodo = async (todoData: CreateTodoRequest, userId: number): P
     [userId, title, description, priority, due_date]
   );
   
-  return result.rows[0];
+  const todo = result.rows[0];
+  
+  // Add category associations if provided
+  if (categoryIds.length > 0) {
+    await updateTodoCategories(todo.id, categoryIds, userId);
+  }
+  
+  // Get the complete todo with categories
+  return await getTodoById(todo.id, userId) as Todo;
 };
 
 export const updateTodo = async (todoId: number, userId: number, updates: UpdateTodoRequest): Promise<Todo | null> => {
@@ -36,49 +69,54 @@ export const updateTodo = async (todoId: number, userId: number, updates: Update
     throw new Error('Todo not found');
   }
 
+  const { categoryIds, ...todoUpdates } = updates;
   const updateFields: string[] = [];
   const updateValues: any[] = [];
   let paramIndex = 1;
 
-  if (updates.title !== undefined) {
+  if (todoUpdates.title !== undefined) {
     updateFields.push(`title = $${paramIndex++}`);
-    updateValues.push(updates.title);
+    updateValues.push(todoUpdates.title);
   }
   
-  if (updates.description !== undefined) {
+  if (todoUpdates.description !== undefined) {
     updateFields.push(`description = $${paramIndex++}`);
-    updateValues.push(updates.description);
+    updateValues.push(todoUpdates.description);
   }
   
-  if (updates.completed !== undefined) {
+  if (todoUpdates.completed !== undefined) {
     updateFields.push(`completed = $${paramIndex++}`);
-    updateValues.push(updates.completed);
+    updateValues.push(todoUpdates.completed);
   }
   
-  if (updates.priority !== undefined) {
+  if (todoUpdates.priority !== undefined) {
     updateFields.push(`priority = $${paramIndex++}`);
-    updateValues.push(updates.priority);
+    updateValues.push(todoUpdates.priority);
   }
   
-  if (updates.due_date !== undefined) {
+  if (todoUpdates.due_date !== undefined) {
     updateFields.push(`due_date = $${paramIndex++}`);
-    updateValues.push(updates.due_date);
+    updateValues.push(todoUpdates.due_date);
   }
 
-  if (updateFields.length === 0) {
-    return todo;
+  // Update todo fields if there are any changes
+  if (updateFields.length > 0) {
+    updateValues.push(todoId, userId);
+    
+    await query(
+      `UPDATE todos SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $${paramIndex++} AND user_id = $${paramIndex++}`,
+      updateValues
+    );
   }
 
-  updateValues.push(todoId, userId);
-  
-  const result = await query(
-    `UPDATE todos SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
-     WHERE id = $${paramIndex++} AND user_id = $${paramIndex++} 
-     RETURNING *`,
-    updateValues
-  );
+  // Update categories if provided
+  if (categoryIds !== undefined) {
+    await updateTodoCategories(todoId, categoryIds, userId);
+  }
 
-  return result.rows[0];
+  // Return the updated todo with categories
+  return await getTodoById(todoId, userId);
 };
 
 export const deleteTodo = async (todoId: number, userId: number): Promise<boolean> => {
@@ -98,5 +136,46 @@ export const toggleTodoCompletion = async (todoId: number, userId: number): Prom
     [todoId, userId]
   );
   
-  return result.rows[0] || null;
+  const todo = result.rows[0];
+  if (!todo) return null;
+  
+  // Get categories for this todo
+  const categoriesResult = await query(`
+    SELECT c.* FROM categories c
+    JOIN todo_categories tc ON c.id = tc.category_id
+    WHERE tc.todo_id = $1
+  `, [todo.id]);
+  todo.categories = categoriesResult.rows;
+  
+  return todo;
+};
+
+export const updateTodoCategories = async (todoId: number, categoryIds: number[], userId: number): Promise<void> => {
+  // First verify the todo belongs to the user
+  const todoExists = await query(
+    'SELECT id FROM todos WHERE id = $1 AND user_id = $2',
+    [todoId, userId]
+  );
+  
+  if (todoExists.rows.length === 0) {
+    throw new Error('Todo not found');
+  }
+  
+  // Remove existing category associations
+  await query(
+    'DELETE FROM todo_categories WHERE todo_id = $1',
+    [todoId]
+  );
+  
+  // Add new category associations
+  if (categoryIds.length > 0) {
+    const values = categoryIds.map((categoryId, index) => 
+      `($1, $${index + 2})`
+    ).join(', ');
+    
+    await query(
+      `INSERT INTO todo_categories (todo_id, category_id) VALUES ${values}`,
+      [todoId, ...categoryIds]
+    );
+  }
 };
