@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/common/Button';
-import { TodoList } from '../components/todos/TodoList';
 import { CategoryList } from '../components/categories/CategoryList';
-import { Navigation } from '../components/layout/Navigation';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -18,13 +16,6 @@ const Header = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
 `;
 
 const Title = styled.h1`
@@ -47,26 +38,13 @@ const Content = styled.main`
   padding: 0;
 `;
 
-export const DashboardPage: React.FC = () => {
+export const CategoriesPage: React.FC = () => {
   const { user, logout } = useAuth();
-  const [currentView, setCurrentView] = useState<'todos' | 'categories'>('todos');
-
-  const getPageTitle = () => {
-    switch (currentView) {
-      case 'todos':
-        return 'Todo Dashboard';
-      case 'categories':
-        return 'Categories';
-      default:
-        return 'Dashboard';
-    }
-  };
 
   return (
     <Container>
       <Header>
-        <Title>{getPageTitle()}</Title>
-        <Navigation currentView={currentView} onViewChange={setCurrentView} />
+        <Title>Categories</Title>
         <UserInfo>
           <UserName>Welcome, {user?.name}!</UserName>
           <Button variant="secondary" onClick={logout}>
@@ -75,7 +53,7 @@ export const DashboardPage: React.FC = () => {
         </UserInfo>
       </Header>
       <Content>
-        {currentView === 'todos' ? <TodoList /> : <CategoryList />}
+        <CategoryList />
       </Content>
     </Container>
   );

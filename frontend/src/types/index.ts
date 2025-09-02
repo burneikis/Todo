@@ -49,3 +49,13 @@ export interface UpdateTodoRequest {
   priority?: 'low' | 'medium' | 'high';
   due_date?: string;
 }
+
+export interface CreateCategoryRequest {
+  name: string;
+  color?: string;
+}
+
+export interface UpdateCategoryRequest {
+  name?: string;
+  color?: string;
+}

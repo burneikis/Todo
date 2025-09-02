@@ -14,18 +14,37 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
   button {
     font-family: inherit;
+    -webkit-appearance: none;
+    border: none;
+    outline: none;
   }
 
-  input {
+  input, textarea, select {
     font-family: inherit;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px;
+    }
   }
 `;
 
