@@ -49,12 +49,19 @@ const CategoriesGrid = styled.div`
   }
 `;
 
-const CategoryCard = styled.div`
+const CategoryCard = styled.div<{ clickable?: boolean }>`
   background: white;
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
   position: relative;
+  cursor: ${props => props.clickable ? 'pointer' : 'default'};
+  transition: all 0.15s;
+
+  &:hover {
+    transform: ${props => props.clickable ? 'translateY(-2px)' : 'none'};
+    box-shadow: ${props => props.clickable ? '0 4px 8px 0 rgba(0, 0, 0, 0.15)' : '0 1px 3px 0 rgba(0, 0, 0, 0.1)'};
+  }
 `;
 
 const CategoryHeader = styled.div`
@@ -167,7 +174,11 @@ const EditModalContent = styled.div`
   overflow-y: auto;
 `;
 
-export const CategoryList: React.FC = () => {
+interface CategoryListProps {
+  onCategoryClick?: (categoryId: number) => void;
+}
+
+export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -243,6 +254,12 @@ export const CategoryList: React.FC = () => {
     setEditingCategory(null);
   };
 
+  const handleCategoryCardClick = (categoryId: number) => {
+    if (onCategoryClick) {
+      onCategoryClick(categoryId);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -310,7 +327,11 @@ export const CategoryList: React.FC = () => {
       ) : (
         <CategoriesGrid>
           {categories.map(category => (
-            <CategoryCard key={category.id}>
+            <CategoryCard 
+              key={category.id}
+              clickable={!!onCategoryClick}
+              onClick={() => handleCategoryCardClick(category.id)}
+            >
               <CategoryHeader>
                 <CategoryIcon color={category.color}>
                   {category.name.charAt(0).toUpperCase()}
@@ -324,17 +345,35 @@ export const CategoryList: React.FC = () => {
               </CategoryHeader>
 
               <ButtonGroup>
+                {onCategoryClick && (
+                  <Button
+                    variant="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCategoryCardClick(category.id);
+                    }}
+                  >
+                    View Todos
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => handleEditCategory(category)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditCategory(category);
+                  }}
                 >
                   Edit
                 </Button>
                 <Button
                   variant="danger"
                   size="small"
-                  onClick={() => handleDeleteCategory(category.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteCategory(category.id);
+                  }}
                 >
                   Delete
                 </Button>

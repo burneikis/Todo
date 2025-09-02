@@ -56,11 +56,12 @@ const Content = styled.main`
 export const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState<'todos' | 'categories'>('todos');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<number | undefined>();
 
   const getPageTitle = () => {
     switch (currentView) {
       case 'todos':
-        return 'Todo Dashboard';
+        return selectedCategoryFilter ? 'Filtered Todos' : 'Todo Dashboard';
       case 'categories':
         return 'Categories';
       default:
@@ -68,11 +69,23 @@ export const DashboardPage: React.FC = () => {
     }
   };
 
+  const handleCategoryClick = (categoryId: number) => {
+    setSelectedCategoryFilter(categoryId);
+    setCurrentView('todos');
+  };
+
+  const handleViewChange = (view: 'todos' | 'categories') => {
+    if (view === 'categories') {
+      setSelectedCategoryFilter(undefined);
+    }
+    setCurrentView(view);
+  };
+
   return (
     <Container>
       <Header>
         <Title>{getPageTitle()}</Title>
-        <Navigation currentView={currentView} onViewChange={setCurrentView} />
+        <Navigation currentView={currentView} onViewChange={handleViewChange} />
         <UserInfo>
           <UserName>Welcome, {user?.name}!</UserName>
           <Button variant="secondary" onClick={logout}>
@@ -81,7 +94,11 @@ export const DashboardPage: React.FC = () => {
         </UserInfo>
       </Header>
       <Content>
-        {currentView === 'todos' ? <TodoList /> : <CategoryList />}
+        {currentView === 'todos' ? (
+          <TodoList initialCategoryFilter={selectedCategoryFilter} />
+        ) : (
+          <CategoryList onCategoryClick={handleCategoryClick} />
+        )}
       </Content>
     </Container>
   );

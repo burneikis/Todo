@@ -112,7 +112,11 @@ const EditModalContent = styled.div`
   overflow-y: auto;
 `;
 
-export const TodoList: React.FC = () => {
+interface TodoListProps {
+  initialCategoryFilter?: number;
+}
+
+export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +128,7 @@ export const TodoList: React.FC = () => {
     search: '',
     status: 'all',
     priority: 'all',
-    category: 'all',
+    category: initialCategoryFilter ? initialCategoryFilter.toString() : 'all',
     sortBy: 'created_at',
     sortOrder: 'desc',
   });
@@ -133,6 +137,15 @@ export const TodoList: React.FC = () => {
     loadTodos();
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    if (initialCategoryFilter !== undefined) {
+      setFilters(prev => ({
+        ...prev,
+        category: initialCategoryFilter.toString(),
+      }));
+    }
+  }, [initialCategoryFilter]);
 
   const loadTodos = async () => {
     try {
