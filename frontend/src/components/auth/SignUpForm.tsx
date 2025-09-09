@@ -17,8 +17,9 @@ const FormContainer = styled.div`
   margin: 2rem auto;
   padding: 2rem;
   border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  background: white;
+  box-shadow: ${({ theme }) => theme.shadows.large};
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
 
   @media (max-width: 640px) {
     margin: 1rem;
@@ -31,7 +32,7 @@ const Title = styled.h1`
   font-weight: bold;
   text-align: center;
   margin-bottom: 2rem;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const Form = styled.form`
@@ -48,22 +49,29 @@ const FormGroup = styled.div`
 const Label = styled.label`
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #374151;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
+  
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
   }
 `;
 
 const ErrorMessage = styled.span`
-  color: #ef4444;
+  color: ${({ theme }) => theme.colors.danger};
   font-size: 0.875rem;
   margin-top: 0.25rem;
 `;
@@ -71,11 +79,11 @@ const ErrorMessage = styled.span`
 const LinkText = styled.p`
   text-align: center;
   margin-top: 1rem;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 const StyledLink = styled(Link)`
-  color: #3b82f6;
+  color: ${({ theme }) => theme.colors.primary};
   text-decoration: none;
   &:hover {
     text-decoration: underline;

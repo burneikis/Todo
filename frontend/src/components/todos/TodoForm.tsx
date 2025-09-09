@@ -5,11 +5,12 @@ import { CreateTodoRequest, UpdateTodoRequest, Todo, Category } from '../../type
 import { categoryService } from '../../services/categoryService';
 
 const FormContainer = styled.div`
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
   padding: 1.5rem;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ theme }) => theme.shadows.small};
   margin-bottom: 2rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
 
   @media (max-width: 640px) {
     padding: 1rem;
@@ -31,52 +32,65 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-weight: 600;
-  color: #374151;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 0.875rem;
 `;
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 1rem;
   transition: border-color 0.15s;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
   }
 `;
 
 const TextArea = styled.textarea`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 1rem;
   min-height: 80px;
   resize: vertical;
   transition: border-color 0.15s;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
   }
 `;
 
 const Select = styled.select`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 1rem;
-  background-color: white;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
   transition: border-color 0.15s;
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
   }
 `;
 
@@ -110,23 +124,28 @@ const CategorySelection = styled.div`
 const CategoryTag = styled.button<{ selected: boolean; color: string }>`
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  border: 2px solid ${props => props.selected ? props.color : '#e5e7eb'};
-  background-color: ${props => props.selected ? props.color : 'white'};
-  color: ${props => props.selected ? 'white' : '#374151'};
+  border: 2px solid ${props => props.selected ? props.color : props.theme.colors.border};
+  background-color: ${props => props.selected ? props.color : props.theme.colors.surface};
+  color: ${props => props.selected ? 'white' : props.theme.colors.textSecondary};
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: ${props => props.color};
-    background-color: ${props => props.selected ? props.color : `${props.color}10`};
+    background-color: ${props => props.selected ? props.color : `${props.color}20`};
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
+
+const NoCategories = styled.span`
+  color: ${({ theme }) => theme.colors.textMuted};
+  font-size: 0.875rem;
 `;
 
 interface TodoFormProps {
@@ -277,9 +296,9 @@ export const TodoForm: React.FC<TodoFormProps> = ({
               </CategoryTag>
             ))}
             {categories.length === 0 && (
-              <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+              <NoCategories>
                 No categories available. Create some categories first!
-              </span>
+              </NoCategories>
             )}
           </CategorySelection>
         </FormGroup>

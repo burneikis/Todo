@@ -38,42 +38,44 @@ const StyledButton = styled.button<{ variant: string; size: string }>`
     }
   }}
   
-  ${({ variant }) => {
+  ${({ variant, theme }) => {
     switch (variant) {
       case 'primary':
         return `
-          background-color: #3b82f6;
+          background-color: ${theme.colors.primary};
           color: white;
-          &:hover {
-            background-color: #2563eb;
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.primaryHover};
           }
           &:disabled {
-            background-color: #9ca3af;
+            background-color: ${theme.colors.textMuted};
             cursor: not-allowed;
           }
         `;
       case 'secondary':
         return `
-          background-color: #f3f4f6;
-          color: #374151;
-          &:hover {
-            background-color: #e5e7eb;
+          background-color: ${theme.colors.surface};
+          color: ${theme.colors.textSecondary};
+          border: 1px solid ${theme.colors.border};
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.background};
+            color: ${theme.colors.text};
           }
           &:disabled {
-            background-color: #f9fafb;
-            color: #9ca3af;
+            background-color: ${theme.colors.background};
+            color: ${theme.colors.textMuted};
             cursor: not-allowed;
           }
         `;
       case 'danger':
         return `
-          background-color: #ef4444;
+          background-color: ${theme.colors.danger};
           color: white;
-          &:hover {
-            background-color: #dc2626;
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.dangerHover};
           }
           &:disabled {
-            background-color: #9ca3af;
+            background-color: ${theme.colors.textMuted};
             cursor: not-allowed;
           }
         `;

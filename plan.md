@@ -202,7 +202,6 @@ frontend/
 
 ### Phase 3: Enhancement
 1. Add priority and due date features
-2. Implement real-time updates
 3. Add theme switching
 4. Performance optimization
 

@@ -4,10 +4,11 @@ import { Button } from '../common/Button';
 import { CreateCategoryRequest, UpdateCategoryRequest, Category } from '../../types';
 
 const FormContainer = styled.div`
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
   padding: 1.5rem;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   margin-bottom: 2rem;
 `;
 
@@ -25,21 +26,27 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-weight: 600;
-  color: #374151;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 0.875rem;
 `;
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 1rem;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
   transition: border-color 0.15s;
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
   }
 `;
 

@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Category } from '../../types';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const FiltersContainer = styled.div`
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
   padding: 1.5rem;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   margin-bottom: 2rem;
 `;
 
@@ -28,7 +30,7 @@ const FiltersHeader = styled.div`
 const FiltersTitle = styled.h3`
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const FiltersGrid = styled.div`
@@ -49,43 +51,50 @@ const FilterGroup = styled.div`
 
 const FilterLabel = styled.label`
   font-weight: 600;
-  color: #374151;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 0.875rem;
 `;
 
 const SearchInput = styled.input`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 1rem;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
   transition: border-color 0.15s;
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
   }
 `;
 
 const Select = styled.select`
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 1rem;
-  background-color: white;
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
   transition: border-color 0.15s;
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary}20;
   }
 `;
 
 const StatusTabs = styled.div`
   display: flex;
   gap: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   margin-bottom: 1rem;
 `;
 
@@ -93,23 +102,23 @@ const StatusTab = styled.button<{ active: boolean }>`
   padding: 0.75rem 1rem;
   border: none;
   background: none;
-  color: ${props => props.active ? '#3b82f6' : '#6b7280'};
+  color: ${props => props.active ? props.theme.colors.primary : props.theme.colors.textMuted};
   font-weight: ${props => props.active ? 600 : 400};
-  border-bottom: 2px solid ${props => props.active ? '#3b82f6' : 'transparent'};
+  border-bottom: 2px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
-    color: #3b82f6;
+    color: ${({ theme }) => theme.colors.primary};
   }
 `;
 
 const ClearButton = styled.button<{ visible: boolean }>`
   padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
-  background: white;
-  color: #6b7280;
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.875rem;
   cursor: ${props => props.visible ? 'pointer' : 'default'};
   transition: all 0.15s;
@@ -117,8 +126,8 @@ const ClearButton = styled.button<{ visible: boolean }>`
   opacity: ${props => props.visible ? 1 : 0};
 
   &:hover {
-    background: ${props => props.visible ? '#f9fafb' : 'white'};
-    border-color: ${props => props.visible ? '#9ca3af' : '#d1d5db'};
+    background: ${props => props.visible ? props.theme.colors.background : props.theme.colors.surface};
+    border-color: ${props => props.visible ? props.theme.colors.textMuted : props.theme.colors.border};
   }
 
   &:disabled {
@@ -129,17 +138,18 @@ const ClearButton = styled.button<{ visible: boolean }>`
 const FilterSummary = styled.div`
   margin-top: 1rem;
   padding: 0.75rem;
-  background: #f9fafb;
+  background: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 export interface TodoFilters {
   search: string;
   status: 'all' | 'completed' | 'pending';
   priority: 'all' | 'low' | 'medium' | 'high';
-  category: 'all' | number;
+  category: 'all' | string;
   sortBy: 'created_at' | 'due_date' | 'priority' | 'title';
   sortOrder: 'asc' | 'desc';
 }
@@ -152,21 +162,39 @@ interface TodoFiltersProps {
   categories?: Category[];
 }
 
-export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
+export const TodoFiltersComponent: React.FC<TodoFiltersProps> = React.memo(({
   filters,
   onFiltersChange,
   totalCount,
   filteredCount,
   categories = [],
 }) => {
-  const handleFilterChange = (key: keyof TodoFilters, value: string) => {
+  const [searchValue, setSearchValue] = useState(filters.search);
+  const debouncedSearch = useDebounce(searchValue, 300);
+
+  // Update parent filters when debounced search changes
+  React.useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      onFiltersChange({
+        ...filters,
+        search: debouncedSearch,
+      });
+    }
+  }, [debouncedSearch, filters, onFiltersChange]);
+
+  const handleFilterChange = useCallback((key: keyof TodoFilters, value: string) => {
+    if (key === 'search') {
+      setSearchValue(value);
+      return;
+    }
     onFiltersChange({
       ...filters,
       [key]: value,
     });
-  };
+  }, [filters, onFiltersChange]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
+    setSearchValue('');
     onFiltersChange({
       search: '',
       status: 'all',
@@ -175,7 +203,7 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
       sortBy: 'created_at',
       sortOrder: 'desc',
     });
-  };
+  }, [onFiltersChange]);
 
   const hasActiveFilters = filters.search || filters.status !== 'all' || filters.priority !== 'all' || filters.category !== 'all';
 
@@ -211,7 +239,7 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
             id="search"
             type="text"
             placeholder="Search todos..."
-            value={filters.search}
+            value={searchValue}
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </FilterGroup>
@@ -279,4 +307,4 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = ({
       </FilterSummary>
     </FiltersContainer>
   );
-};
+});

@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { HomePage } from './pages/HomePage';
-import { LoginPage } from './pages/LoginPage';
-import { SignUpPage } from './pages/SignUpPage';
-import { DashboardPage } from './pages/DashboardPage';
+import { ThemeProvider } from './context/ThemeContext';
+
+// Lazy load pages for better performance
+const HomePage = React.lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
+const LoginPage = React.lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
+const SignUpPage = React.lazy(() => import('./pages/SignUpPage').then(module => ({ default: module.SignUpPage })));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -23,9 +26,11 @@ const GlobalStyle = createGlobalStyle`
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    color: #333;
+    color: ${({ theme }) => theme.colors.text};
+    background-color: ${({ theme }) => theme.colors.background};
     min-height: 100vh;
     overflow-x: hidden;
+    transition: color 0.3s ease, background-color 0.3s ease;
   }
 
   button {
@@ -51,6 +56,41 @@ const GlobalStyle = createGlobalStyle`
 const AppContainer = styled.div`
   min-height: 100vh;
 `;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid ${({ theme }) => theme.colors.border};
+  border-top: 3px solid ${({ theme }) => theme.colors.primary};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.p`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 1.125rem;
+`;
+
+const LoadingFallback: React.FC = () => (
+  <LoadingContainer>
+    <LoadingSpinner />
+    <LoadingText>Loading...</LoadingText>
+  </LoadingContainer>
+);
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -78,33 +118,37 @@ const AppRoutes: React.FC = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-      <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <SignUpPage />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+        <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <SignUpPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContainer>
-          <GlobalStyle />
-          <AppRoutes />
-        </AppContainer>
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <AppContainer>
+            <GlobalStyle />
+            <AppRoutes />
+          </AppContainer>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

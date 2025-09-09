@@ -4,14 +4,15 @@ import { Todo } from '../../types';
 import { Button } from '../common/Button';
 
 const TodoCard = styled.div<{ completed: boolean }>`
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ theme }) => theme.shadows.small};
   padding: 1.5rem;
   margin-bottom: 1rem;
   opacity: ${props => props.completed ? 0.7 : 1};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-left: 4px solid ${props => {
-    if (props.completed) return '#10b981';
+    if (props.completed) return props.theme.colors.success;
     return 'transparent';
   }};
 `;
@@ -41,16 +42,16 @@ const StyledCheckbox = styled.div<{ checked: boolean }>`
   display: inline-block;
   width: 1.25rem;
   height: 1.25rem;
-  background: ${props => props.checked ? '#10b981' : 'white'};
-  border: 2px solid ${props => props.checked ? '#10b981' : '#d1d5db'};
+  background: ${props => props.checked ? props.theme.colors.success : props.theme.colors.surface};
+  border: 2px solid ${props => props.checked ? props.theme.colors.success : props.theme.colors.border};
   border-radius: 0.25rem;
   transition: all 0.15s;
   position: relative;
   cursor: pointer;
   
   &:hover {
-    border-color: ${props => props.checked ? '#059669' : '#9ca3af'};
-    background: ${props => props.checked ? '#059669' : '#f9fafb'};
+    border-color: ${props => props.checked ? props.theme.colors.success : props.theme.colors.textMuted};
+    background: ${props => props.checked ? props.theme.colors.success : props.theme.colors.background};
   }
   
   &::after {
@@ -87,14 +88,14 @@ const TodoContent = styled.div`
 const TodoTitle = styled.h3<{ completed: boolean }>`
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${props => props.completed ? '#6b7280' : '#111827'};
+  color: ${props => props.completed ? props.theme.colors.textMuted : props.theme.colors.text};
   text-decoration: ${props => props.completed ? 'line-through' : 'none'};
   margin-bottom: 0.5rem;
   word-break: break-word;
 `;
 
 const TodoDescription = styled.p<{ completed: boolean }>`
-  color: ${props => props.completed ? '#9ca3af' : '#6b7280'};
+  color: ${props => props.completed ? props.theme.colors.textMuted : props.theme.colors.textSecondary};
   margin-bottom: 1rem;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -123,16 +124,16 @@ const PriorityBadge = styled.span<{ priority: 'low' | 'medium' | 'high' }>`
   text-transform: uppercase;
   background-color: ${props => {
     switch (props.priority) {
-      case 'high': return '#fee2e2';
-      case 'medium': return '#fef3c7';
-      case 'low': return '#dcfce7';
+      case 'high': return props.theme.colors.priority.highBg;
+      case 'medium': return props.theme.colors.priority.mediumBg;
+      case 'low': return props.theme.colors.priority.lowBg;
     }
   }};
   color: ${props => {
     switch (props.priority) {
-      case 'high': return '#dc2626';
-      case 'medium': return '#d97706';
-      case 'low': return '#16a34a';
+      case 'high': return props.theme.colors.priority.high;
+      case 'medium': return props.theme.colors.priority.medium;
+      case 'low': return props.theme.colors.priority.low;
     }
   }};
 `;
@@ -140,16 +141,16 @@ const PriorityBadge = styled.span<{ priority: 'low' | 'medium' | 'high' }>`
 const DueDate = styled.span<{ overdue: boolean; completed: boolean }>`
   font-size: 0.875rem;
   color: ${props => {
-    if (props.completed) return '#9ca3af';
-    if (props.overdue) return '#dc2626';
-    return '#6b7280';
+    if (props.completed) return props.theme.colors.textMuted;
+    if (props.overdue) return props.theme.colors.danger;
+    return props.theme.colors.textSecondary;
   }};
   font-weight: ${props => props.overdue && !props.completed ? 600 : 400};
 `;
 
 const CreatedDate = styled.span`
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 const ButtonGroup = styled.div`
@@ -184,7 +185,7 @@ interface TodoItemProps {
   isLoading?: boolean;
 }
 
-export const TodoItem: React.FC<TodoItemProps> = ({
+export const TodoItem: React.FC<TodoItemProps> = React.memo(({
   todo,
   onToggle,
   onEdit,
@@ -306,4 +307,4 @@ export const TodoItem: React.FC<TodoItemProps> = ({
       </TodoHeader>
     </TodoCard>
   );
-};
+});

@@ -8,12 +8,13 @@ import { Navigation } from '../components/layout/Navigation';
 
 const Container = styled.div`
   min-height: 100vh;
-  background: #f9fafb;
+  background: ${({ theme }) => theme.colors.background};
 `;
 
 const Header = styled.header`
-  background: white;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background: ${({ theme }) => theme.colors.surface};
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   padding: 1rem 2rem;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -31,7 +32,7 @@ const Header = styled.header`
 const Title = styled.h1`
   font-size: 1.5rem;
   font-weight: bold;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const UserInfo = styled.div`
@@ -46,7 +47,7 @@ const UserInfo = styled.div`
 `;
 
 const UserName = styled.span`
-  color: #374151;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 const Content = styled.main`

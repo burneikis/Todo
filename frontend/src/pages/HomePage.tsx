@@ -9,7 +9,11 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: ${({ theme }) => 
+    theme.mode === 'dark' 
+      ? 'linear-gradient(135deg, #1e3a8a 0%, #581c87 100%)'
+      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  };
   color: white;
   text-align: center;
   padding: 2rem;

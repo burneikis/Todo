@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthContextType, User } from '../types';
 import { authService } from '../services/authService';
+import { setGlobalLogoutHandler } from '../services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -59,6 +60,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setToken(null);
     authService.logout();
   };
+
+  // Register the logout handler with the API service
+  useEffect(() => {
+    setGlobalLogoutHandler(logout);
+  }, []);
 
   const value: AuthContextType = {
     user,
