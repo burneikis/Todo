@@ -8,7 +8,7 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-export const query = (text: string, params?: any[]) => {
+export const query = (text: string, params?: (string | number | boolean | null)[]) => {
   return pool.query(text, params);
 };
 

@@ -1,17 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthContextType, User } from '../types';
 import { authService } from '../services/authService';
 import { setGlobalLogoutHandler } from '../services/api';
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+import { AuthContext } from './AuthContextDefinition';
 
 interface AuthProviderProps {
   children: React.ReactNode;

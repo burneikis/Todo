@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/common/Button';
 import { TodoList } from '../components/todos/TodoList';
 import { CategoryList } from '../components/categories/CategoryList';

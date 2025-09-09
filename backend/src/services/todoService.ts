@@ -71,7 +71,7 @@ export const updateTodo = async (todoId: number, userId: number, updates: Update
 
   const { categoryIds, ...todoUpdates } = updates;
   const updateFields: string[] = [];
-  const updateValues: any[] = [];
+  const updateValues: (string | boolean | number | null)[] = [];
   let paramIndex = 1;
 
   if (todoUpdates.title !== undefined) {

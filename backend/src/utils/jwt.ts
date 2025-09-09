@@ -12,13 +12,13 @@ export const generateToken = (payload: object): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 };
 
-export const verifyToken = (token: string): any => {
+export const verifyToken = (token: string): jwt.JwtPayload | string => {
   if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is required');
   }
   return jwt.verify(token, JWT_SECRET);
 };
 
-export const decodeToken = (token: string): any => {
+export const decodeToken = (token: string): jwt.JwtPayload | string | null => {
   return jwt.decode(token);
 };

@@ -12,8 +12,18 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
 
   try {
     const decoded = verifyToken(token);
-    req.user = decoded;
-    next();
+    
+    // Ensure decoded is an object (JwtPayload) and has the expected user properties
+    if (typeof decoded === 'object' && decoded && 'id' in decoded && 'email' in decoded && 'name' in decoded) {
+      req.user = {
+        id: decoded.id as number,
+        email: decoded.email as string,
+        name: decoded.name as string,
+      };
+      next();
+    } else {
+      return res.status(403).json({ error: 'Invalid token payload' });
+    }
   } catch (error) {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
