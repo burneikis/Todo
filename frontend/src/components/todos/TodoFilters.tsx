@@ -205,7 +205,7 @@ export const TodoFiltersComponent: React.FC<TodoFiltersProps> = React.memo(({
     });
   }, [onFiltersChange]);
 
-  const hasActiveFilters = filters.search || filters.status !== 'all' || filters.priority !== 'all' || filters.category !== 'all';
+  const hasActiveFilters = Boolean(filters.search || filters.status !== 'all' || filters.priority !== 'all' || filters.category !== 'all');
 
   return (
     <FiltersContainer>

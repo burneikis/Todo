@@ -229,33 +229,33 @@ export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => 
     return filtered;
   }, [todos, filters]);
 
-  const handleCreateTodo = async (data: CreateTodoRequest) => {
-    try {
-      setActionLoading(true);
-      const newTodo = await todoService.createTodo(data);
-      setTodos(prev => [newTodo, ...prev]);
-      setShowForm(false);
-    } catch (err) {
-      setError('Failed to create todo. Please try again.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleUpdateTodo = async (data: UpdateTodoRequest) => {
-    if (!editingTodo) return;
-
-    try {
-      setActionLoading(true);
-      const updatedTodo = await todoService.updateTodo(editingTodo.id, data);
-      setTodos(prev => prev.map(todo => 
-        todo.id === editingTodo.id ? updatedTodo : todo
-      ));
-      setEditingTodo(null);
-    } catch (err) {
-      setError('Failed to update todo. Please try again.');
-    } finally {
-      setActionLoading(false);
+  const handleCreateOrUpdateTodo = async (data: CreateTodoRequest | UpdateTodoRequest) => {
+    if (editingTodo) {
+      // Update mode
+      try {
+        setActionLoading(true);
+        const updatedTodo = await todoService.updateTodo(editingTodo.id, data as UpdateTodoRequest);
+        setTodos(prev => prev.map(todo => 
+          todo.id === editingTodo.id ? updatedTodo : todo
+        ));
+        setEditingTodo(null);
+      } catch (err) {
+        setError('Failed to update todo. Please try again.');
+      } finally {
+        setActionLoading(false);
+      }
+    } else {
+      // Create mode
+      try {
+        setActionLoading(true);
+        const newTodo = await todoService.createTodo(data as CreateTodoRequest);
+        setTodos(prev => [newTodo, ...prev]);
+        setShowForm(false);
+      } catch (err) {
+        setError('Failed to create todo. Please try again.');
+      } finally {
+        setActionLoading(false);
+      }
     }
   };
 
@@ -323,7 +323,7 @@ export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => 
 
       {showForm && (
         <TodoForm
-          onSubmit={handleCreateTodo}
+          onSubmit={handleCreateOrUpdateTodo}
           onCancel={() => setShowForm(false)}
           isLoading={actionLoading}
         />
@@ -394,7 +394,7 @@ export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => 
           {editingTodo && (
             <TodoForm
               initialData={editingTodo}
-              onSubmit={handleUpdateTodo}
+              onSubmit={handleCreateOrUpdateTodo}
               onCancel={handleCancelEdit}
               isLoading={actionLoading}
             />

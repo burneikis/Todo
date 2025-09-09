@@ -203,33 +203,33 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) =
     }
   };
 
-  const handleCreateCategory = async (data: CreateCategoryRequest) => {
-    try {
-      setActionLoading(true);
-      const newCategory = await categoryService.createCategory(data);
-      setCategories(prev => [newCategory, ...prev]);
-      setShowForm(false);
-    } catch (err) {
-      setError('Failed to create category. Please try again.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleUpdateCategory = async (data: UpdateCategoryRequest) => {
-    if (!editingCategory) return;
-
-    try {
-      setActionLoading(true);
-      const updatedCategory = await categoryService.updateCategory(editingCategory.id, data);
-      setCategories(prev => prev.map(category => 
-        category.id === editingCategory.id ? updatedCategory : category
-      ));
-      setEditingCategory(null);
-    } catch (err) {
-      setError('Failed to update category. Please try again.');
-    } finally {
-      setActionLoading(false);
+  const handleCreateOrUpdateCategory = async (data: CreateCategoryRequest | UpdateCategoryRequest) => {
+    if (editingCategory) {
+      // Update mode
+      try {
+        setActionLoading(true);
+        const updatedCategory = await categoryService.updateCategory(editingCategory.id, data as UpdateCategoryRequest);
+        setCategories(prev => prev.map(category => 
+          category.id === editingCategory.id ? updatedCategory : category
+        ));
+        setEditingCategory(null);
+      } catch (err) {
+        setError('Failed to update category. Please try again.');
+      } finally {
+        setActionLoading(false);
+      }
+    } else {
+      // Create mode
+      try {
+        setActionLoading(true);
+        const newCategory = await categoryService.createCategory(data as CreateCategoryRequest);
+        setCategories(prev => [newCategory, ...prev]);
+        setShowForm(false);
+      } catch (err) {
+        setError('Failed to create category. Please try again.');
+      } finally {
+        setActionLoading(false);
+      }
     }
   };
 
@@ -304,7 +304,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) =
 
       {showForm && (
         <CategoryForm
-          onSubmit={handleCreateCategory}
+          onSubmit={handleCreateOrUpdateCategory}
           onCancel={() => setShowForm(false)}
           isLoading={actionLoading}
         />
@@ -349,7 +349,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) =
                   <Button
                     variant="primary"
                     size="small"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                       e.stopPropagation();
                       handleCategoryCardClick(category.id);
                     }}
@@ -360,7 +360,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) =
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation();
                     handleEditCategory(category);
                   }}
@@ -370,7 +370,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) =
                 <Button
                   variant="danger"
                   size="small"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation();
                     handleDeleteCategory(category.id);
                   }}
@@ -388,7 +388,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({ onCategoryClick }) =
           {editingCategory && (
             <CategoryForm
               initialData={editingCategory}
-              onSubmit={handleUpdateCategory}
+              onSubmit={handleCreateOrUpdateCategory}
               onCancel={handleCancelEdit}
               isLoading={actionLoading}
             />
