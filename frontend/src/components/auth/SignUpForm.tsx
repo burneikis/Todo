@@ -111,8 +111,10 @@ export const SignUpForm: React.FC = () => {
       setErrorMessage('');
       await registerUser(data.email, data.password, data.name);
       navigate('/dashboard');
-    } catch (error: any) {
-      setErrorMessage(error.response?.data?.error || 'Registration failed');
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : 
+        (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Registration failed';
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }

@@ -106,8 +106,10 @@ export const LoginForm: React.FC = () => {
       setErrorMessage('');
       await login(data.email, data.password);
       navigate('/dashboard');
-    } catch (error: any) {
-      setErrorMessage(error.response?.data?.error || 'Login failed');
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : 
+        (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Login failed';
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }

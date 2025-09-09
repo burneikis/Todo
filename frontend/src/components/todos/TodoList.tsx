@@ -164,7 +164,7 @@ export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => 
       setTodos(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load todos. Please try again.');
+      setError('Failed to load todos. Please try again. (Refresh the page)');
     } finally {
       setLoading(false);
     }
@@ -180,7 +180,7 @@ export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => 
   };
 
   const filteredAndSortedTodos = useMemo(() => {
-    let filtered = todos.filter(todo => {
+    const filtered = todos.filter(todo => {
       const matchesSearch = !filters.search || 
         todo.title.toLowerCase().includes(filters.search.toLowerCase()) ||
         (todo.description && todo.description.toLowerCase().includes(filters.search.toLowerCase()));
@@ -205,11 +205,12 @@ export const TodoList: React.FC<TodoListProps> = ({ initialCategoryFilter }) => 
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
           break;
-        case 'priority':
+        case 'priority': {
           const priorityOrder = { high: 3, medium: 2, low: 1 };
           aValue = priorityOrder[a.priority];
           bValue = priorityOrder[b.priority];
           break;
+        }
         case 'due_date':
           aValue = a.due_date ? new Date(a.due_date).getTime() : 0;
           bValue = b.due_date ? new Date(b.due_date).getTime() : 0;

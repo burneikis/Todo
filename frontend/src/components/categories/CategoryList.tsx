@@ -31,7 +31,7 @@ const Header = styled.div`
 const Title = styled.h1`
   font-size: 2rem;
   font-weight: bold;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text};
 
   @media (max-width: 640px) {
     font-size: 1.5rem;
@@ -50,9 +50,10 @@ const CategoriesGrid = styled.div`
 `;
 
 const CategoryCard = styled.div<{ clickable?: boolean }>`
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   padding: 1.5rem;
   position: relative;
   cursor: ${props => props.clickable ? 'pointer' : 'default'};
@@ -60,7 +61,7 @@ const CategoryCard = styled.div<{ clickable?: boolean }>`
 
   &:hover {
     transform: ${props => props.clickable ? 'translateY(-2px)' : 'none'};
-    box-shadow: ${props => props.clickable ? '0 4px 8px 0 rgba(0, 0, 0, 0.15)' : '0 1px 3px 0 rgba(0, 0, 0, 0.1)'};
+    box-shadow: ${props => props.clickable ? props.theme.shadows.medium : props.theme.shadows.small};
   }
 `;
 
@@ -92,13 +93,13 @@ const CategoryInfo = styled.div`
 const CategoryName = styled.h3`
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text};
   margin-bottom: 0.25rem;
   word-break: break-word;
 `;
 
 const CategoryMeta = styled.div`
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.875rem;
 `;
 
@@ -111,26 +112,27 @@ const ButtonGroup = styled.div`
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  border: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 const EmptyStateIcon = styled.div`
   font-size: 4rem;
   margin-bottom: 1rem;
-  color: #9ca3af;
+  color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 const EmptyStateTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #374151;
+  color: ${({ theme }) => theme.colors.textSecondary};
   margin-bottom: 0.5rem;
 `;
 
 const EmptyStateText = styled.p`
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.textMuted};
   margin-bottom: 2rem;
 `;
 
@@ -140,12 +142,13 @@ const LoadingSpinner = styled.div`
   align-items: center;
   padding: 4rem;
   font-size: 1.125rem;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 const ErrorMessage = styled.div`
-  background: #fee2e2;
-  color: #dc2626;
+  background: ${({ theme }) => theme.colors.danger}20;
+  color: ${({ theme }) => theme.colors.danger};
+  border: 1px solid ${({ theme }) => theme.colors.danger}40;
   padding: 1rem;
   border-radius: 0.375rem;
   margin-bottom: 2rem;
@@ -166,12 +169,14 @@ const EditModal = styled.div<{ show: boolean }>`
 `;
 
 const EditModalContent = styled.div`
-  background: white;
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 0.5rem;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: ${({ theme }) => theme.shadows.large};
 `;
 
 interface CategoryListProps {

@@ -42,6 +42,6 @@ export const loginUser = async (credentials: LoginRequest): Promise<{ user: Omit
 
   const token = generateToken({ id: user.id, email: user.email, name: user.name });
   
-  const { password_hash, ...userWithoutPassword } = user;
+  const { password_hash: _, ...userWithoutPassword } = user;
   return { user: userWithoutPassword, token };
 };
